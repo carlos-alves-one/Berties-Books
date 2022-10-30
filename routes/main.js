@@ -224,6 +224,9 @@ module.exports = function (app, shopData) {
           // store the username in a variable to be used with the EJS pages
           loggedinuser = req.body.username;
 
+          // Save user session here, when login is successful
+          req.session.userId = req.body.username;
+
           // render the new user page
           res.render('newUser.ejs', shopData);
         }
