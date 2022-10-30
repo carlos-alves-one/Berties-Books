@@ -1,0 +1,95 @@
+/* 
+Goldsmiths University of London
+Author....: Carlos Manuel de Oliveira Alves
+Student...: cdeol003
+Created...: 27/10/2022
+Lab No....: 2 Part 1 
+*/
+
+body {
+  background-image:  url("/images/background.jpeg");
+ 
+}
+
+h1 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    color: rgb(42, 42, 42);
+}
+
+h2 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    color: rgb(7, 8, 8);
+}
+
+p,li {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+li {
+
+  font-size: large;
+  text-decoration: none;
+  width:inherit;
+  list-style: none;
+  padding-top: 9px;
+  color: black;
+  
+
+}
+
+a:link {
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+    padding:5px;
+   
+  }
+  
+  /* visited link */
+  a:visited {
+    color: rgb(91, 91, 91);
+    text-decoration: none;
+    padding:5px;
+  }
+  
+  /* mouse over link */
+  a:hover {
+    color: rgb(39, 39, 39);
+    text-decoration: none;
+    background-color: rgb(213, 213, 213);
+    padding:5px;
+  }
+  
+  /* selected link */
+  a:active {
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+    padding:5px;
+    font-size: 115%;
+    font-weight: bold;
+  }
+
+table, th, td {
+  border: 0.45px solid #282727;
+  border-collapse: collapse;
+  padding: 6%;
+    
+} 
+ 
+th {
+    text-align: left;
+    font-family: Arial, Helvetica, sans-serif;
+    padding:10px;
+}
+
+td {
+    font-family: Arial, Helvetica, sans-serif;
+    padding:10px;
+}
+
+
+tr:hover {
+    background-color: #a3aaaa;
+    cursor: pointer;
+}
