@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // Set up css
 app.use(express.static(__dirname + '/public'));
 
-// Create a express session 
+// Create an express session 
 app.use(session({
     secret: 'somerandomstuff',
     resave: false,

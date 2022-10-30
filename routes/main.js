@@ -7,6 +7,13 @@
 // declare variable for bcrypt
 const bcrypt = require('bcrypt');
 
+// declare variable to redirect login
+const redirectLogin = (req, res, next) => {
+  if (!req.session.userId ) {
+  res.redirect('./login')
+  } else { next (); }
+}
+
 // --->>> Handle our routes .......................................................................................................................
 
 // define the routes
