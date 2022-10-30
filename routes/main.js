@@ -39,8 +39,7 @@ module.exports = function (app, shopData) {
   app.get('/search-result', function (req, res) {
 
     // searching in the database
-    let sqlquery =
-      "SELECT * FROM books WHERE name LIKE '%" + req.query.keyword + "%'";
+    let sqlquery = "SELECT * FROM books WHERE name LIKE '%" + req.query.keyword + "%'";
 
     // query database to get all the books
     // execute sql query
