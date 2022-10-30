@@ -18,7 +18,7 @@ module.exports = function (app, shopData) {
     // check the user didn't started a new session
     if (!req.session.userId ) {
 
-      // if not true redirect to login page
+      // if not true redirect to login
       res.redirect('./login')
     } 
     // user already started a new session

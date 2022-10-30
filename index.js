@@ -72,4 +72,4 @@ var deletedUser = "";
 require("./routes/main")(app, shopData);
 
 // Start the web app listening
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`Berties Books App <-> Listening on port ${port}!`))
