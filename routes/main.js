@@ -188,25 +188,7 @@ module.exports = function (app, shopData) {
         // if not error
         } else {
 
-          // initial code:
-          // result =
-          //   '>>> Hello ' +
-          //   req.body.firstname +
-          //   ' ' +
-          //   req.body.lastname +
-          //   ' you are now registered!' +
-          //   ' >>> We will send an email to you at ' +
-          //   req.body.email +
-          //   ' >>> Your username is ' +
-          //   req.body.username +
-          //   ' >>> Your password is: ' +
-          //   req.body.password +
-          //   ' >>> Your hashed password is: ' +
-          //   hashedPassword;
-          // res.send(result);
-
-          // new code:
-          // print message
+          // print welcome message on the console
           console.log(
             '# Hello ' +
               req.body.firstname +
@@ -224,7 +206,7 @@ module.exports = function (app, shopData) {
           // store the username in a variable to be used with the EJS pages
           loggedinuser = req.body.username;
 
-          // Save user session here, when login is successful
+          // save user session here, when login is successful
           req.session.userId = req.body.username;
 
           // render the new user page
