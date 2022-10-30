@@ -14,9 +14,13 @@ module.exports = function (app, shopData) {
 
   // declare variable to redirect login
   const redirectLogin = (req, res, next) => {
+
+    // Check the user didn't started a new session
     if (!req.session.userId ) {
     res.redirect('./login')
-    } else { next (); }
+    } 
+    // user already started a new session
+    else { next (); }
   }
 
   // use the Express Router to handle our routes
