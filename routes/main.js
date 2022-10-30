@@ -1,23 +1,23 @@
 // Goldsmiths University of London
 // Author....: Carlos Manuel de Oliveira Alves
 // Student...: cdeol003
-// Created...: 27/10/2022
-// Lab No....: 2 Part 1
+// Created...: 30/10/2022
+// Lab No....: 3 Part 1
 
 // declare variable for bcrypt
 const bcrypt = require('bcrypt');
-
-// declare variable to redirect login
-const redirectLogin = (req, res, next) => {
-  if (!req.session.userId ) {
-  res.redirect('./login')
-  } else { next (); }
-}
 
 // --->>> Handle our routes .......................................................................................................................
 
 // define the routes
 module.exports = function (app, shopData) {
+
+  // declare variable to redirect login
+  const redirectLogin = (req, res, next) => {
+    if (!req.session.userId ) {
+    res.redirect('./login')
+    } else { next (); }
+  }
 
   // use the Express Router to handle our routes
   app.get('/', function (req, res) {
