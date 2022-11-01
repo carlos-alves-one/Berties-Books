@@ -207,30 +207,33 @@ module.exports = function (app, shopData) {
   // --->>> LIST ALL BOOKS ..........................................................................................................................
 
   // use the Express Router to handle our routes
-  app.get('/list', function (req, res) {
+  app.get('/list', redirectLogin, function (req, res) {
 
-  // redirect router to login page
-  //app.get('/list', redirectLogin, function (req, res) {
     // query database to get all the books
     let sqlquery = 'SELECT * FROM books';
 
     // query database to get all the books
     // execute sql query
     db.query(sqlquery, (err, result) => {
+
       // if error
       if (err) {
+
         // throw error
         res.redirect('./');
       }
 
-      // define the data to pass to the view
-      let newData = Object.assign({}, shopData, { availableBooks: result });
+      // app.get('/list', function (req, res) {
 
-      // print message
-      console.log(newData);
+        // define the data to pass to the view
+        let newData = Object.assign({}, shopData, { availableBooks: result });
 
-      // render the list page
-      res.render('list.ejs', newData);
+        // print message
+        console.log(newData);
+
+        // render the list page
+        res.render('list.ejs', newData);
+      // );
     });
   });
 
@@ -362,6 +365,9 @@ module.exports = function (app, shopData) {
 
               // store the username in a variable to be used with the EJS pages
               loggedinuser = req.body.username;
+
+              // Save user session here, when login is successful
+              req.session.userId = req.body.username;
 
               // render the wrong key page
               res.render('wrongKey.ejs', shopData);
