@@ -11,31 +11,27 @@ const bcrypt = require('bcrypt');
 
 // define the routes
 module.exports = function (app, shopData) {
-
   // declare variable to redirect login
   const redirectLogin = (req, res, next) => {
-
     // check the user didn't started a new session
-    if (!req.session.userId ) {
-
+    if (!req.session.userId) {
       // if not true redirect to login
-      res.redirect('./login')
-    } 
+      res.redirect('./login');
+    }
     // user already started a new session
-    else { next (); }
-  }
+    else {
+      next();
+    }
+  };
 
   // use the Express Router to handle our routes
   app.get('/', function (req, res) {
-
     // render the index page
     res.render('index.ejs', shopData);
   });
 
   // use the Express Router to handle our routes
   app.get('/about', function (req, res) {
-
-    
     res.render('about.ejs', shopData);
   });
 
@@ -43,24 +39,21 @@ module.exports = function (app, shopData) {
 
   // use the Express Router to handle our routes
   app.get('/search', function (req, res) {
-
     // get the search term from the URL
     res.render('search.ejs', shopData);
   });
 
   // use the Express Router to handle our routes
   app.get('/search-result', function (req, res) {
-
     // searching in the database
-    let sqlquery = "SELECT * FROM books WHERE name LIKE '%" + req.query.keyword + "%'";
+    let sqlquery =
+      "SELECT * FROM books WHERE name LIKE '%" + req.query.keyword + "%'";
 
     // query database to get all the books
     // execute sql query
     db.query(sqlquery, (err, result) => {
-
       // if error
       if (err) {
-
         // throw error
         res.redirect('./');
       }
@@ -80,25 +73,22 @@ module.exports = function (app, shopData) {
 
   // use the Express Router to handle our routes
   app.get('/deleteUser', function (req, res) {
-
     // render the deletion page
     res.render('deleteUser.ejs', shopData);
 
     // use the Express Router to handle our routes
     app.post('/deleted', function (req, res) {
-
       // query database to get the username to delete
-      let sqlquery = "DELETE FROM users WHERE username='" + req.body.keyword + "'";
+      let sqlquery =
+        "DELETE FROM users WHERE username='" + req.body.keyword + "'";
 
       // query database to get all the books
       deletedUser = req.body.keyword;
 
       // execute sql query
       db.query(sqlquery, (err, result) => {
-
         // if error
         if (err || result.affectedRows == 0) {
-
           // throw error
           // render the delete error page
           res.render('deleteError.ejs', shopData);
@@ -108,9 +98,8 @@ module.exports = function (app, shopData) {
             '>>> ERROR: The username ' + req.body.keyword + ' does not exist'
           );
 
-        // if not error
+          // if not error
         } else {
-
           // render the user deleted page
           res.render('userDeleted.ejs', shopData);
 
@@ -127,7 +116,6 @@ module.exports = function (app, shopData) {
 
   // use the Express Router to handle our routes
   app.get('/register', function (req, res) {
-
     // declare array initialvalues to store data
     let initialvalues = {
       username: '',
@@ -142,11 +130,10 @@ module.exports = function (app, shopData) {
     return renderRegisteruser(res, initialvalues, '');
   });
 
-  // --->>> Helper function
+  // --->>> Helper function .........................................................................................................................
 
   // function to render the register user page
   function renderRegisteruser(res, initialvalues, errormessage) {
-
     // store the data in the shopData object
     let data = Object.assign({}, shopData, initialvalues, {
       errormessage: errormessage,
@@ -161,14 +148,12 @@ module.exports = function (app, shopData) {
 
   // use the Express Router to handle our routes
   app.post('/registered', function (req, res) {
-
     // declare variables to use with the function hash of bcrypt
     const saltRounds = 10;
     const plainPassword = req.body.password;
 
     // hash the password
     bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
-
       // declare array params to store data
       var params = [
         req.body.username,
@@ -184,16 +169,13 @@ module.exports = function (app, shopData) {
 
       // execute sql query
       db.query(sqlquery, params, (err, result) => {
-
         // if error
         if (err) {
-
           // return error
           return console.error(err.message);
-          
-        // if not error
-        } else {
 
+          // if not error
+        } else {
           // print welcome message on the console
           console.log(
             '# Hello ' +
@@ -208,7 +190,7 @@ module.exports = function (app, shopData) {
           console.log('# Your username is..............: ' + req.body.username);
           console.log('# Your password is..............: ' + req.body.password);
           console.log('# Hashed password is............: ' + hashedPassword);
-          
+
           // store the username in a variable to be used with the EJS pages
           loggedinuser = req.body.username;
 
@@ -227,16 +209,16 @@ module.exports = function (app, shopData) {
   // use the Express Router to handle our routes
   app.get('/list', function (req, res) {
 
+  // redirect router to login page
+  //app.get('/list', redirectLogin, function (req, res) {
     // query database to get all the books
     let sqlquery = 'SELECT * FROM books';
 
     // query database to get all the books
     // execute sql query
     db.query(sqlquery, (err, result) => {
-    
       // if error
       if (err) {
-
         // throw error
         res.redirect('./');
       }
@@ -256,16 +238,13 @@ module.exports = function (app, shopData) {
 
   // use the Express Router to handle our routes
   app.get('/listusers', function (req, res) {
-
     // query database to get all the books
     sqlquery = 'SELECT * FROM users';
 
     // query database to get all the users
     db.query(sqlquery, (err, result) => {
-
       // if error
       if (err) {
-
         // throw error
         res.redirect('./');
       }
@@ -285,12 +264,10 @@ module.exports = function (app, shopData) {
 
   // use the Express Router to handle our routes
   app.get('/addbook', function (req, res) {
-
     // render the add book page
     res.render('addbook.ejs', shopData);
   });
   app.post('/bookadded', function (req, res) {
-
     // saving data in database
     let sqlquery = 'INSERT INTO books (name, price) VALUES (?,?)';
 
@@ -299,17 +276,16 @@ module.exports = function (app, shopData) {
 
     // execute sql query
     db.query(sqlquery, newrecord, (err, result) => {
-
       // if error
       if (err) {
-
         // throw error
         return console.error(err.message);
 
-      // if not error
-      } else
+        // if not error
+      }
 
-        // print message
+      // print message
+      else
         res.send(
           ' This book is added to database, name: ' +
             req.body.name +
@@ -323,7 +299,6 @@ module.exports = function (app, shopData) {
 
   // use the Express Router to handle our routes
   app.get('/login', function (req, res) {
-
     // render the login page
     res.render('login.ejs', shopData);
   });
@@ -332,7 +307,6 @@ module.exports = function (app, shopData) {
 
   // use the Express Router to handle our routes
   app.post('/loggedin', function (req, res) {
-
     // declare array params to store data
     let params = [req.body.username, req.body.password];
 
@@ -341,17 +315,14 @@ module.exports = function (app, shopData) {
 
     // execute sql query
     db.query(sqlquery, params, (err, result) => {
-
       // if error
       if (err) {
-
         // return console.error(err.message);
         res.render('login.ejs', shopData);
       }
 
       // if not error
       if ((username = result[0])) {
-
         // print message
         console.log('Your username is correct');
 
@@ -363,22 +334,18 @@ module.exports = function (app, shopData) {
 
         // execute sql query
         db.query(sqlquery, [req.body.username], (err, result) => {
-
           // declare variable to store hashed password
           let hashedPassword = result[0].hashedPassword;
 
           // use function compare of bcrypt to compare the password with the hashed password
           bcrypt.compare(password, hashedPassword, function (err, result) {
-
             // if error
             if (err) {
-
               // throw error
               return console.error(err.message);
-              
-            // if not error
-            } else if (result == true) {
 
+              // if not error
+            } else if (result == true) {
               // print message
               console.log('>>> Your password is correct');
 
@@ -388,9 +355,8 @@ module.exports = function (app, shopData) {
               // render the logged in page
               res.render('loggedin.ejs', shopData);
 
-            // if error
+              // if error
             } else {
-
               // print message
               console.log('>>> Your password is incorrect');
 
@@ -403,9 +369,8 @@ module.exports = function (app, shopData) {
           });
         });
 
-      // if error
+        // if error
       } else {
-        
         // print message
         console.log('>>> This username does not exist.');
 
@@ -422,16 +387,13 @@ module.exports = function (app, shopData) {
 
   // use the Express Router to handle our routes
   app.get('/bargains', function (req, res) {
-
     // query database to get all the books less than £20
     let sqlquery = 'SELECT * FROM books WHERE price < 20';
 
     // execute sql query
     db.query(sqlquery, (err, result) => {
-
       // if error
       if (err) {
-
         // throw error
         res.redirect('./');
       }
