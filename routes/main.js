@@ -1,8 +1,8 @@
 // Goldsmiths University of London
 // Author....: Carlos Manuel de Oliveira Alves
 // Student...: cdeol003
-// Created...: 30/10/2022
-// Lab No....: 3 Part 1
+// Created...: 15/11/2022
+// Lab No....: 3 Part 1 + 2
 
 // declare variable for bcrypt
 const bcrypt = require('bcrypt');
@@ -212,10 +212,10 @@ module.exports = function (app, shopData) {
         bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
           // declare array params to store data
           var params = [
-            req.body.username,
-            req.body.firstname,
-            req.body.lastname,
-            req.body.email,
+            req.sanitize(req.body.username),
+            req.sanitize(req.body.firstname),
+            req.sanitize(req.body.lastname),
+            req.sanitize(req.body.email),
             hashedPassword,
           ];
 
@@ -235,9 +235,9 @@ module.exports = function (app, shopData) {
               // print welcome message on the console
               console.log(
                 '# Hello ' +
-                  req.body.firstname +
+                req.body.firstname +
                   ' ' +
-                  req.body.lastname +
+                req.body.lastname +
                   ' you are now registered!'
               );
 
