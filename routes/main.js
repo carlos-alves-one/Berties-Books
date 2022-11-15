@@ -11,6 +11,9 @@ const bcrypt = require('bcrypt');
 
 // define the routes
 module.exports = function (app, shopData) {
+  // declare variable to validate email
+  const { check, validationResult, Result } = require('express-validator');
+
   // declare variable to redirect login
   const redirectLogin = (req, res, next) => {
     // check the user didn't started a new session
@@ -72,7 +75,7 @@ module.exports = function (app, shopData) {
   // --->>> DELETE A USER ............................................................................................................................
 
   // use the Express Router to handle our routes
-  app.get('/deleteUser', function (req, res) {
+  app.get('/deleteUser', redirectLogin, function (req, res) {
     // render the deletion page
     res.render('deleteUser.ejs', shopData);
 
@@ -147,92 +150,149 @@ module.exports = function (app, shopData) {
   }
 
   // use the Express Router to handle our routes
-  app.post('/registered', function (req, res) {
-    // declare variables to use with the function hash of bcrypt
-    const saltRounds = 10;
-    const plainPassword = req.body.password;
+  app.post(
+    '/registered',
 
-    // hash the password
-    bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
-      // declare array params to store data
-      var params = [
-        req.body.username,
-        req.body.firstname,
-        req.body.lastname,
-        req.body.email,
-        hashedPassword,
-      ];
+    // check is a valid email
+    [check('email').isEmail()],
 
-      // query database to create a new record
-      sqlquery =
-        'INSERT INTO users (username, firstname, lastname, email, hashedPassword) VALUES (?,?,?,?,?)';
+ 
+    // check the password must be 8+ chars long and contain a number
+    [check('password', 'The password must be 8+ chars long and contain a number')
+    .not()
+    .isIn(['123', 'password', 'abc123'])
+    .withMessage('Do not use a common word as the password. ')
+    .isLength({ min: 8 })
+    .matches(/\d/)
+    .withMessage('Must contain a number. ')],
 
-      // execute sql query
-      db.query(sqlquery, params, (err, result) => {
-        // if error
-        if (err) {
-          // return error
-          return console.error(err.message);
+    function (req, res) {
 
-          // if not error
-        } else {
-          // print welcome message on the console
+      // store the errors in a dictionary
+      const errors = validationResult(req);
+
+      // check the errors dictionary is not empty
+      if (!errors.isEmpty()) {
+
+        // redirect to register page
+        res.redirect('./register');
+
+        // print errors dictionary for debug purposes
+        console.log(errors);
+      
+        // check we have an invalid email
+        if (errors.errors[0].param == 'email') {
           console.log(
-            '# Hello ' +
-              req.body.firstname +
-              ' ' +
-              req.body.lastname +
-              ' you are now registered!'
+          '>>> ERROR: Email is invalid. Please enter again the data'
           );
-
-          // more print messages
-          console.log('# You will receive an email at..: ' + req.body.email);
-          console.log('# Your username is..............: ' + req.body.username);
-          console.log('# Your password is..............: ' + req.body.password);
-          console.log('# Hashed password is............: ' + hashedPassword);
-
-          // store the username in a variable to be used with the EJS pages
-          loggedinuser = req.body.username;
-
-          // save user session here, when login is successful
-          req.session.userId = req.body.username;
-
-          // render the new user page
-          res.render('newUser.ejs', shopData);
         }
-      });
-    });
-  });
+
+        // check we have an invalid password length
+        if (errors.errors[0].param == 'password' || errors.errors[1].param == 'password') {
+          console.log(
+          '>>> ERROR: The password must be 8+ chars long and contain a number. Please enter again'
+          );
+        }
+
+        // check username is different from password
+        if (req.body.username == req.body.password) {
+          console.log(
+            '>>> ERROR: The password and username cannot be the same. Please enter again'
+            );
+        }
+
+      // we have a valid input
+      } else {
+        
+        // declare variables to use with the function hash of bcrypt
+        const saltRounds = 10;
+        const plainPassword = req.body.password;
+
+        // hash the password
+        bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
+          // declare array params to store data
+          var params = [
+            req.body.username,
+            req.body.firstname,
+            req.body.lastname,
+            req.body.email,
+            hashedPassword,
+          ];
+
+          // query database to create a new record
+          sqlquery =
+            'INSERT INTO users (username, firstname, lastname, email, hashedPassword) VALUES (?,?,?,?,?)';
+
+          // execute sql query
+          db.query(sqlquery, params, (err, result) => {
+            // if error
+            if (err) {
+              // return error
+              return console.error(err.message);
+
+              // if not error
+            } else {
+              // print welcome message on the console
+              console.log(
+                '# Hello ' +
+                  req.body.firstname +
+                  ' ' +
+                  req.body.lastname +
+                  ' you are now registered!'
+              );
+
+              // more print messages
+              console.log(
+                '# You will receive an email at..: ' + req.body.email
+              );
+              console.log(
+                '# Your username is..............: ' + req.body.username
+              );
+              console.log(
+                '# Your password is..............: ' + req.body.password
+              );
+              console.log(
+                '# Hashed password is............: ' + hashedPassword
+              );
+
+              // store the username in a variable to be used with the EJS pages
+              loggedinuser = req.body.username;
+
+              // render the new user page
+              res.render('newUser.ejs', shopData);
+            }
+          });
+        });
+      }
+    }
+  );
 
   // --->>> LIST ALL BOOKS ..........................................................................................................................
 
   // use the Express Router to handle our routes
   app.get('/list', redirectLogin, function (req, res) {
-
     // query database to get all the books
     let sqlquery = 'SELECT * FROM books';
 
     // query database to get all the books
     // execute sql query
     db.query(sqlquery, (err, result) => {
-
       // if error
       if (err) {
-
         // throw error
         res.redirect('./');
       }
 
       // app.get('/list', function (req, res) {
 
-        // define the data to pass to the view
-        let newData = Object.assign({}, shopData, { availableBooks: result });
+      // define the data to pass to the view
+      let newData = Object.assign({}, shopData, { availableBooks: result });
 
-        // print message
-        console.log(newData);
+      // print message
+      console.log(newData);
 
-        // render the list page
-        res.render('list.ejs', newData);
+      // render the list page
+      res.render('list.ejs', newData);
       // );
     });
   });
@@ -240,7 +300,7 @@ module.exports = function (app, shopData) {
   // --->>> LIST ALL USERS ..........................................................................................................................
 
   // use the Express Router to handle our routes
-  app.get('/listusers', function (req, res) {
+  app.get('/listusers', redirectLogin, function (req, res) {
     // query database to get all the books
     sqlquery = 'SELECT * FROM users';
 
@@ -266,7 +326,7 @@ module.exports = function (app, shopData) {
   // --->>> ADD A NEW BOOK ..........................................................................................................................
 
   // use the Express Router to handle our routes
-  app.get('/addbook', function (req, res) {
+  app.get('/addbook', redirectLogin, function (req, res) {
     // render the add book page
     res.render('addbook.ejs', shopData);
   });
@@ -355,6 +415,9 @@ module.exports = function (app, shopData) {
               // store the username in a variable to be used with the EJS pages
               loggedinuser = req.body.username;
 
+              // Save user session here, when login is successful
+              req.session.userId = req.body.username;
+
               // render the logged in page
               res.render('loggedin.ejs', shopData);
 
@@ -365,9 +428,6 @@ module.exports = function (app, shopData) {
 
               // store the username in a variable to be used with the EJS pages
               loggedinuser = req.body.username;
-
-              // Save user session here, when login is successful
-              req.session.userId = req.body.username;
 
               // render the wrong key page
               res.render('wrongKey.ejs', shopData);
@@ -392,7 +452,7 @@ module.exports = function (app, shopData) {
   // --->>> BARGAIN ...............................................................................................................................
 
   // use the Express Router to handle our routes
-  app.get('/bargains', function (req, res) {
+  app.get('/bargains', redirectLogin, function (req, res) {
     // query database to get all the books less than £20
     let sqlquery = 'SELECT * FROM books WHERE price < 20';
 
@@ -415,16 +475,15 @@ module.exports = function (app, shopData) {
     });
   });
 
-
   // --->>> LOGOUT ...............................................................................................................................
-  
+
   // use the Express Router to handle our routes
-  app.get('/logout', redirectLogin, (req,res) => {
-    req.session.destroy(err => {
-    if (err) {
-    return res.redirect('./')
-    }
-    res.send('you are now logged out. <a href='+'./'+'>Home</a>');
-    })
-    })
+  app.get('/logout', redirectLogin, (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.redirect('./');
+      }
+      res.send('you are now logged out. <a href=' + './' + '>Home</a>');
+    });
+  });
 };

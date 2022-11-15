@@ -1,10 +1,12 @@
 // Goldsmiths University of London
 // Author....: Carlos Manuel de Oliveira Alves
 // Student...: cdeol003
-// Created...: 30/10/2022
-// Lab No....: 3 Part 1
+// Created...: 15/11/2022
+// Lab No....: 3 Part 1 + 2
 
 // Import the modules we need for this project
+const expressSanitizer = require('express-sanitizer');
+var validator = require ('express-validator');
 var session = require ('express-session');
 var express = require ('express')
 var ejs = require('ejs')
@@ -15,6 +17,9 @@ const mysql = require('mysql');
 const app = express()
 const port = 8000
 app.use(bodyParser.urlencoded({ extended: true }))
+
+// Create an input sanitizer
+app.use(expressSanitizer());
 
 // Set up css
 app.use(express.static(__dirname + '/public'));
