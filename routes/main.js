@@ -83,10 +83,12 @@ module.exports = function (app, shopData) {
     app.post('/deleted', function (req, res) {
       // query database to get the username to delete
       let sqlquery =
-        "DELETE FROM users WHERE username='" + req.body.keyword + "'";
+        "DELETE FROM users WHERE username='" +
+        req.sanitize(req.body.keyword) +
+        "'";
 
       // query database to get all the books
-      deletedUser = req.body.keyword;
+      deletedUser = req.sanitize(req.body.keyword);
 
       // execute sql query
       db.query(sqlquery, (err, result) => {
@@ -156,41 +158,58 @@ module.exports = function (app, shopData) {
     // check is a valid email
     [check('email').isEmail()],
 
+    // check if the password is not empty
+    [check('password').not().notEmpty().withMessage('Password is required')],
+    
+    // check if the username is not empty and at least 5 characters
+    [check('username')
+      .notEmpty()
+      .withMessage('Username is required')
+      .isLength({ min: 5 })
+      .withMessage('Username must be at least 5 characters long'),
+    ],
+
     // check the password must be 8+ chars long and contain a number
-    [check('password', 'The password must be 8+ chars long and contain a number')
-    .not()
-    .isIn(['123', 'password', 'abc123'])
-    .withMessage('Do not use a common word as the password. ')
-    .isLength({ min: 8 })
-    .matches(/\d/)
-    .withMessage('Must contain a number. ')],
+    [
+      check(
+        'password',
+        'The password must be 8+ chars long and contain a number'
+      )
+        .not()
+        .isIn(['123', 'password', 'abc123'])
+        .withMessage('Do not use a common word as the password. ')
+        .isLength({ min: 8 })
+        .matches(/\d/)
+        .withMessage('Must contain a number. '),
+    ],
 
     // call function request and response
     function (req, res) {
-
       // store the errors in a dictionary
       const errors = validationResult(req);
 
-      // check the errors dictionary is not empty
+      // check we have errors in the dictionary
       if (!errors.isEmpty()) {
-
         // redirect to register page
         res.redirect('./register');
 
         // print errors dictionary for debug purposes
         console.log(errors);
-      
+
         // check we have an invalid email
         if (errors.errors[0].param == 'email') {
           console.log(
-          '>>> ERROR: Email is invalid. Please enter again the data'
+            '>>> ERROR: Email is invalid. Please enter again the data'
           );
         }
 
         // check we have an invalid password length
-        if (errors.errors[0].param == 'password' || errors.errors[1].param == 'password') {
+        if (
+          errors.errors[0].param == 'password' ||
+          errors.errors[1].param == 'password'
+        ) {
           console.log(
-          '>>> ERROR: The password must be 8+ chars long and contain a number. Please enter again'
+            '>>> ERROR: The password must be 8+ chars long and contain a number. Please enter again'
           );
         }
 
@@ -198,24 +217,23 @@ module.exports = function (app, shopData) {
         if (req.body.username == req.body.password) {
           console.log(
             '>>> ERROR: The password and username cannot be the same. Please enter again'
-            );
+          );
         }
 
-      // we have a valid input
+        // we have a valid input
       } else {
-        
         // declare variables to use with the function hash of bcrypt
         const saltRounds = 10;
         const plainPassword = req.body.password;
 
         // hash the password
         bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
-          // declare array params to store data
+          // declare array initialvalues to store data
           var params = [
-            req.sanitize(req.body.username),
-            req.sanitize(req.body.firstname),
-            req.sanitize(req.body.lastname),
-            req.sanitize(req.body.email),
+            req.body.username,
+            req.body.firstname,
+            req.body.lastname,
+            req.body.email,
             hashedPassword,
           ];
 
@@ -235,9 +253,9 @@ module.exports = function (app, shopData) {
               // print welcome message on the console
               console.log(
                 '# Hello ' +
-                req.body.firstname +
+                  req.body.firstname +
                   ' ' +
-                req.body.lastname +
+                  req.body.lastname +
                   ' you are now registered!'
               );
 
@@ -335,7 +353,7 @@ module.exports = function (app, shopData) {
     let sqlquery = 'INSERT INTO books (name, price) VALUES (?,?)';
 
     // execute sql query
-    let newrecord = [req.body.name, req.body.price];
+    let newrecord = [req.sanitize(req.body.name), req.sanitize(req.body.price)];
 
     // execute sql query
     db.query(sqlquery, newrecord, (err, result) => {
@@ -371,7 +389,10 @@ module.exports = function (app, shopData) {
   // use the Express Router to handle our routes
   app.post('/loggedin', function (req, res) {
     // declare array params to store data
-    let params = [req.body.username, req.body.password];
+    let params = [
+      req.sanitize(req.body.username),
+      req.sanitize(req.body.password),
+    ];
 
     // query database to get all the books
     sqlquery = 'SELECT username FROM users WHERE username = ? ';
@@ -396,7 +417,7 @@ module.exports = function (app, shopData) {
         sqlquery = 'SELECT hashedPassword FROM users WHERE username = ?';
 
         // execute sql query
-        db.query(sqlquery, [req.body.username], (err, result) => {
+        db.query(sqlquery, [req.sanitize(req.body.username)], (err, result) => {
           // declare variable to store hashed password
           let hashedPassword = result[0].hashedPassword;
 
@@ -413,10 +434,10 @@ module.exports = function (app, shopData) {
               console.log('>>> Your password is correct');
 
               // store the username in a variable to be used with the EJS pages
-              loggedinuser = req.body.username;
+              loggedinuser = req.sanitize(req.body.username);
 
               // Save user session here, when login is successful
-              req.session.userId = req.body.username;
+              req.session.userId = req.sanitize(req.body.username);
 
               // render the logged in page
               res.render('loggedin.ejs', shopData);
@@ -427,7 +448,7 @@ module.exports = function (app, shopData) {
               console.log('>>> Your password is incorrect');
 
               // store the username in a variable to be used with the EJS pages
-              loggedinuser = req.body.username;
+              loggedinuser = req.sanitize(req.body.username);
 
               // render the wrong key page
               res.render('wrongKey.ejs', shopData);
@@ -441,7 +462,7 @@ module.exports = function (app, shopData) {
         console.log('>>> This username does not exist.');
 
         // store the username in a variable to be used with the EJS pages
-        loggedinuser = req.body.username;
+        loggedinuser = req.sanitize(req.body.username);
 
         // render the logged out page
         res.render('loggedout.ejs', shopData);
