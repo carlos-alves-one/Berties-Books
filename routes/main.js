@@ -156,7 +156,6 @@ module.exports = function (app, shopData) {
     // check is a valid email
     [check('email').isEmail()],
 
- 
     // check the password must be 8+ chars long and contain a number
     [check('password', 'The password must be 8+ chars long and contain a number')
     .not()
@@ -166,6 +165,7 @@ module.exports = function (app, shopData) {
     .matches(/\d/)
     .withMessage('Must contain a number. ')],
 
+    // call function request and response
     function (req, res) {
 
       // store the errors in a dictionary
