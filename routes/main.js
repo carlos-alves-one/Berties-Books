@@ -41,7 +41,7 @@ module.exports = function (app, shopData) {
   // --->>> SEARCH BOOK RESULT .......................................................................................................................
 
   // use the Express Router to handle our routes
-  app.get('/search', function (req, res) {
+  app.get('/search', redirectLogin, function (req, res) {
     // get the search term from the URL
     res.render('search.ejs', shopData);
   });
@@ -164,6 +164,8 @@ module.exports = function (app, shopData) {
     // check if the username is not empty and at least 5 characters
     [check('username')
       .notEmpty()
+      .trim()
+      .escape()
       .withMessage('Username is required')
       .isLength({ min: 5 })
       .withMessage('Username must be at least 5 characters long'),
@@ -175,6 +177,8 @@ module.exports = function (app, shopData) {
         'password',
         'The password must be 8+ chars long and contain a number'
       )
+        .trim()
+        .escape()
         .not()
         .isIn(['123', 'password', 'abc123'])
         .withMessage('Do not use a common word as the password. ')
@@ -228,6 +232,13 @@ module.exports = function (app, shopData) {
 
         // hash the password
         bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
+
+          // sanitize the input
+          let username = req.sanitize(req.body.username);
+          let firstname = req.sanitize(req.body.firstname);
+          let lastname = req.sanitize(req.body.lastname);
+          let email = req.sanitize(req.body.email);
+          
           // declare array initialvalues to store data
           var params = [
             req.body.username,
