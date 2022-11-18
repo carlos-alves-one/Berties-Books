@@ -81,7 +81,7 @@ module.exports = function (app, shopData) {
 
     // use the Express Router to handle our routes
     app.post('/deleted', function (req, res) {
-      // query database to get the username to delete
+      // query database to get the username to delete and sanitize it
       let sqlquery =
         "DELETE FROM users WHERE username='" +
         req.sanitize(req.body.keyword) +
