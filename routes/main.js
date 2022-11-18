@@ -363,7 +363,7 @@ module.exports = function (app, shopData) {
     // saving data in database
     let sqlquery = 'INSERT INTO books (name, price) VALUES (?,?)';
 
-    // execute sql query
+    // execute sql query and sanitize the input
     let newrecord = [req.sanitize(req.body.name), req.sanitize(req.body.price)];
 
     // execute sql query
