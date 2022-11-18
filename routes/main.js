@@ -47,30 +47,58 @@ module.exports = function (app, shopData) {
   });
 
   // use the Express Router to handle our routes
-  app.get('/search-result', function (req, res) {
-    // searching in the database
-    let sqlquery =
-      "SELECT * FROM books WHERE name LIKE '%" + req.query.keyword + "%'";
+  app.get(
+    '/search-result',
 
-    // query database to get all the books
-    // execute sql query
-    db.query(sqlquery, (err, result) => {
-      // if error
-      if (err) {
-        // throw error
-        res.redirect('./');
+    [check('keyword').isLength({ min: 3 })],
+    [
+      check('keyword')
+        .isAlphanumeric()
+        .withMessage('Book name must be alphanumeric'),
+    ],
+
+    function (req, res) {
+      // store the errors in a dictionary
+      const errors = validationResult(req);
+
+      // check we have errors in the dictionary
+      if (!errors.isEmpty()) {
+        // print errors dictionary for debug purposes
+        console.log(errors);
+
+        // print error message
+        console.log('>>> ERROR: Please enter again the data');
+
+        // redirect to the search page
+        res.redirect('/search');
+
+      } else {
+        // searching in the database
+        let sqlquery =
+          "SELECT * FROM books WHERE name LIKE '%" + 
+          req.sanitize(req.query.keyword) + "%'";
+
+        // query database to get all the books
+        // execute sql query
+        db.query(sqlquery, (err, result) => {
+          // if error
+          if (err) {
+            // throw error
+            res.redirect('./');
+          }
+
+          // define the data to pass to the view
+          let newData = Object.assign({}, shopData, { availableBooks: result });
+
+          // print message
+          console.log(newData);
+
+          // render the list page
+          res.render('list.ejs', newData);
+        });
       }
-
-      // define the data to pass to the view
-      let newData = Object.assign({}, shopData, { availableBooks: result });
-
-      // print message
-      console.log(newData);
-
-      // render the list page
-      res.render('list.ejs', newData);
-    });
-  });
+    }
+  );
 
   // --->>> DELETE A USER ............................................................................................................................
 
@@ -80,41 +108,69 @@ module.exports = function (app, shopData) {
     res.render('deleteUser.ejs', shopData);
 
     // use the Express Router to handle our routes
-    app.post('/deleted', function (req, res) {
-      // query database to get the username to delete and sanitize it
-      let sqlquery =
-        "DELETE FROM users WHERE username='" +
-        req.sanitize(req.body.keyword) +
-        "'";
+    app.post(
+      '/deleted',
+      [check('keyword').isLength({ min: 3 })],
+      [
+        check('keyword')
+          .isAlphanumeric()
+          .withMessage('Username must be alphanumeric'),
+      ],
 
-      // query database to get all the books
-      deletedUser = req.sanitize(req.body.keyword);
+      function (req, res) {
+        // store the errors in a dictionary
+        const errors = validationResult(req);
 
-      // execute sql query
-      db.query(sqlquery, (err, result) => {
-        // if error
-        if (err || result.affectedRows == 0) {
-          // throw error
-          // render the delete error page
-          res.render('deleteError.ejs', shopData);
+        // check we have errors in the dictionary
+        if (!errors.isEmpty()) {
+          // print errors dictionary for debug purposes
+          console.log(errors);
 
-          // print the error message
-          console.log(
-            '>>> ERROR: The username ' + req.body.keyword + ' does not exist'
-          );
+          // print error message
+          console.log('>>> ERROR: Please enter again the data');
 
-          // if not error
+          // redirect to the deletion page
+          res.redirect('./deleteUser');
+
         } else {
-          // render the user deleted page
-          res.render('userDeleted.ejs', shopData);
+          // query database to get the username to delete and sanitize it
+          let sqlquery =
+            "DELETE FROM users WHERE username='" +
+            req.sanitize(req.body.keyword) +
+            "'";
 
-          // print the message
-          console.log(
-            '>>> The username ' + req.body.keyword + ' has been deleted'
-          );
+          // query database to get all the books
+          deletedUser = req.sanitize(req.body.keyword);
+
+          // execute sql query
+          db.query(sqlquery, (err, result) => {
+            // if error
+            if (err || result.affectedRows == 0) {
+              // throw error
+              // render the delete error page
+              res.render('deleteError.ejs', shopData);
+
+              // print the error message
+              console.log(
+                '>>> ERROR: The username ' +
+                  req.body.keyword +
+                  ' does not exist'
+              );
+
+              // if not error
+            } else {
+              // render the user deleted page
+              res.render('userDeleted.ejs', shopData);
+
+              // print the message
+              console.log(
+                '>>> The username ' + req.body.keyword + ' has been deleted'
+              );
+            }
+          });
         }
-      });
-    });
+      }
+    );
   });
 
   // --->>> REGISTER NEW USER ........................................................................................................................
@@ -160,15 +216,16 @@ module.exports = function (app, shopData) {
 
     // check if the password is not empty
     [check('password').not().notEmpty().withMessage('Password is required')],
-    
+
     // check if the username is not empty and at least 5 characters
-    [check('username')
-      .notEmpty()
-      .trim()
-      .escape()
-      .withMessage('Username is required')
-      .isLength({ min: 5 })
-      .withMessage('Username must be at least 5 characters long'),
+    [
+      check('username')
+        .notEmpty()
+        .trim()
+        .escape()
+        .withMessage('Username is required')
+        .isLength({ min: 5 })
+        .withMessage('Username must be at least 5 characters long'),
     ],
 
     // check the password must be 8+ chars long and contain a number
@@ -232,13 +289,12 @@ module.exports = function (app, shopData) {
 
         // hash the password
         bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
-
           // sanitize the input
           let username = req.sanitize(req.body.username);
           let firstname = req.sanitize(req.body.firstname);
           let lastname = req.sanitize(req.body.lastname);
           let email = req.sanitize(req.body.email);
-          
+
           // declare array initialvalues to store data
           var params = [
             req.body.username,
@@ -312,8 +368,6 @@ module.exports = function (app, shopData) {
         res.redirect('./');
       }
 
-      // app.get('/list', function (req, res) {
-
       // define the data to pass to the view
       let newData = Object.assign({}, shopData, { availableBooks: result });
 
@@ -359,33 +413,71 @@ module.exports = function (app, shopData) {
     // render the add book page
     res.render('addbook.ejs', shopData);
   });
-  app.post('/bookadded', function (req, res) {
-    // saving data in database
-    let sqlquery = 'INSERT INTO books (name, price) VALUES (?,?)';
+  app.post(
+    '/bookadded',
+    [
+      check('name')
+        .isLength({ min: 3 })
+        .withMessage('Name the of the book must be at least 3 characters long'),
+    ],
+    [
+      check('price')
+        .isLength({ min: 1 })
+        .withMessage('Price must be at least 1 character long'),
+    ],
+    [check('price').isNumeric().withMessage('Price must be a number')],
+    [
+      check('price')
+        .isFloat({ min: 0.01 })
+        .withMessage('Price must be at least 0.01'),
+    ],
+    [check('price').isEmpty().withMessage('Price must be a number')],
 
-    // execute sql query and sanitize the input
-    let newrecord = [req.sanitize(req.body.name), req.sanitize(req.body.price)];
+    function (req, res) {
+      // store the errors in a dictionary
+      const errors = validationResult(req);
 
-    // execute sql query
-    db.query(sqlquery, newrecord, (err, result) => {
-      // if error
-      if (err) {
-        // throw error
-        return console.error(err.message);
+      // check we have errors in the dictionary
+      if (!errors.isEmpty()) {
+        // print errors dictionary for debug purposes
+        console.log(errors);
 
-        // if not error
+        // print error message
+        console.log('>>> ERROR: Please enter again the data');
+
+        res.redirect('./addbook');
+      } else {
+        // saving data in database
+        let sqlquery = 'INSERT INTO books (name, price) VALUES (?,?)';
+
+        // execute sql query and sanitize the input
+        let newrecord = [
+          req.sanitize(req.body.name),
+          req.sanitize(req.body.price),
+        ];
+
+        // execute sql query
+        db.query(sqlquery, newrecord, (err, result) => {
+          // if error
+          if (err) {
+            // throw error
+            return console.error(err.message);
+
+            // if not error
+          }
+
+          // print message
+          else
+            res.send(
+              ' This book is added to database, name: ' +
+                req.body.name +
+                ' price ' +
+                req.body.price
+            );
+        });
       }
-
-      // print message
-      else
-        res.send(
-          ' This book is added to database, name: ' +
-            req.body.name +
-            ' price ' +
-            req.body.price
-        );
-    });
-  });
+    }
+  );
 
   // --->>> LOGIN ...................................................................................................................................
 
