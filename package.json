@@ -16,6 +16,7 @@
     "express-sanitizer": "^1.0.6",
     "express-session": "^1.17.3",
     "express-validator": "^6.14.2",
+    "init": "^0.1.2",
     "mysql": "^2.18.1",
     "node.js": "0.0.1-security",
     "pug": "^3.0.2"

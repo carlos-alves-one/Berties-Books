@@ -1,8 +1,8 @@
 // Goldsmiths University of London
 // Author....: Carlos Manuel de Oliveira Alves
 // Student...: cdeol003
-// Created...: 15/11/2022
-// Lab No....: 3 Part 1 + 2
+// Created...: 21/11/2022
+// Lab No....: 4
 
 // declare variable for bcrypt
 const bcrypt = require('bcrypt');
