@@ -6,17 +6,17 @@
 
 // Import the modules we need for this project
 const expressSanitizer = require('express-sanitizer');
-var validator = require ('express-validator');
-var session = require ('express-session');
-var express = require ('express')
-var ejs = require('ejs')
-var bodyParser= require ('body-parser')
+var validator = require('express-validator');
+var session = require('express-session');
+var express = require('express');
+var ejs = require('ejs');
+var bodyParser = require('body-parser');
 const mysql = require('mysql');
 
 // Create the express application object
-const app = express()
-const port = 8000
-app.use(bodyParser.urlencoded({ extended: true }))
+const app = express();
+const port = 8000;
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Create an input sanitizer
 app.use(expressSanitizer());
@@ -24,30 +24,32 @@ app.use(expressSanitizer());
 // Set up css
 app.use(express.static(__dirname + '/public'));
 
-// Create an express session 
-app.use(session({
+// Create an express session
+app.use(
+  session({
     secret: 'somerandomstuff',
     resave: false,
     saveUninitialized: false,
     cookie: {
-    expires: 600000
-    }
-}));
+      expires: 600000,
+    },
+  })
+);
 
 // Define the database connection
-const db = mysql.createConnection ({
-    host: 'localhost',
-    user: 'appuser',
-    password: 'app2027',
-    database: 'myBookshop'
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'appuser',
+  password: 'app2027',
+  database: 'myBookshop',
 });
 
 // Connect to the database
 db.connect((err) => {
-    if (err) {
-        throw err;
-    }
-    console.log('>>> Connected to the Book Shop Database');
+  if (err) {
+    throw err;
+  }
+  console.log('>>> Connected to the Book Shop Database');
 });
 global.db = db;
 
@@ -63,17 +65,20 @@ app.set('view engine', 'ejs');
 app.engine('html', ejs.renderFile);
 
 // Define our data
-var shopData = {shopName: "Bertie's Books"}
-var loggedinuser = "";
-var emailaddress_ = "";
-var firstname_ = "";
-var lastname_ = "";
-var password_ = "";
-var passwordHash = "";
-var deletedUser = "";
+var shopData = { shopName: "Bertie's Books" };
+var loggedinuser = '';
+var emailaddress_ = '';
+var firstname_ = '';
+var lastname_ = '';
+var password_ = '';
+var passwordHash = '';
+var deletedUser = '';
+// var temp = '';
 
 // Requires the main.js file inside the routes folder passing in the Express app and data as arguments.  All the routes will go in this file
-require("./routes/main")(app, shopData);
+require('./routes/main')(app, shopData);
 
 // Start the web app listening
-app.listen(port, () => console.log(`Berties Books App <-> Listening on port ${port}!`))
+app.listen(port, () =>
+  console.log(`Berties Books App <-> Listening on port ${port}!`)
+);

@@ -1,0 +1,60 @@
+<!-- 
+Goldsmiths University of London
+Author....: Carlos Manuel de Oliveira Alves
+Student...: cdeol003
+Created...: 21/11/2022
+Lab No....: 4 
+-->
+<!doctype html>
+<html>
+    <head>
+        <title>Welcome to
+            <%=shopName%></title>
+        <link rel="stylesheet" type="text/css" href="main.css"/>
+    </head>
+    <body>
+        <h1><%=shopName%>
+            Shop</h1>
+        <nav>
+            <ul>
+                <li><a href="about">About <%=shopName%></a></li>
+                <li><a href="tvShows">TV Shows</a></li>
+                <li><a href="weather">Weather</a></li>
+                <li><a href="friendBook-Search">My Friend's Books</a></li>
+                <li><a href="list">List of Books</a></li>
+                <li><a href="addbook">Add a new book</a></li>
+                <li><a href="bargains">Bargain books</a></li>
+                <li><a href="listusers">List of Users</a></li>
+                <li><a href="register">Register new User</a></li>
+                <li><a href="login">User Login</a></li>
+                <li><a href="search">Search for books</a></li>
+                <li><a href="deleteUser">Delete a user</a></li>
+                <li><a href="logout">Logout</a></li>
+            </ul>
+        </nav>
+        <h1>Current Weather in <strong> <span style="text-transform:capitalize"><%=citySelected%></strong></span></h1>
+        <table>
+            <tr>
+                <th>Country</th>
+                <th>Temperature</th>
+                <th>Feels Like</th>
+                <th>Min. Temp.</th>
+                <th>Max. Temp.</th>
+                <th>Description</th>
+                <th>Cloudiness</th>
+                <th>Wind Speed</th>
+                <th>Humidity</th>
+            </tr>
+                <td><%= country %></td>
+                <td><%= temp %>°C</td>
+                <td><%= feelsLike %>°C</td>
+                <td><%= tempMin %>°C</td>
+                <td><%= tempMax %>°C</td>
+                <td><span style="text-transform:capitalize"><%= description %></span></td>
+                <td><%= cloudiness %>%</td>
+                <td><%= windSpeed %> mph</td>
+                <td><%= humidity %>%</td>
+            </tr>
+        </table>
+    </body>
+</html>
